@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role
+  firstName String
+  lastName  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  student     Student?
+  coordinator Coordinator?
+  createdBy   User?   @relation("UserCreatedBy", fields: [createdById], references: [id])
+  createdById String?
+  createdUsers User[] @relation("UserCreatedBy")
+  auditLogs   AuditLog[] @relation("AuditLogUser")
+
+  @@map("users")
+}
+
+model Student {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  rollNumber     String  @unique
+  cgpa           Float
+  demerits       Int     @default(0)
+  currentOffer   Float?
+  department     String
+  graduationYear Int
+  skills         String // JSON array stored as string
+  resumeUrls     String // JSON array stored as string
+  phoneNumber    String? // Student mobile number
+
+  // Tracking fields
+  categoryJumpAttempts Int @default(0)
+  lastOfferDate        DateTime?
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@map("students")
+}
+
+model Coordinator {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  // Professional information
+  department     String?
+  designation    String?
+  phoneNumber    String?
+  officeLocation String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("coordinators")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  ctc         Float
+  category    CompanyCategory
+  location    String?
+  website     String?
+
+  // Job Description and related files
+  jobDescriptionUrl String? // URL to job description PDF
+  jobDescriptionName String? // Original filename
+  requirementsUrl String? // URL to additional requirements PDF
+  requirementsName String? // Original filename
+
+  // Eligibility criteria
+  minCgpa             Float
+  maxDemerits         Int     @default(6)
+  allowedDepartments  String // JSON array stored as string
+
+  // Status and dates
+  isActive            Boolean  @default(true)
+  registrationOpen    Boolean  @default(false)
+  registrationDeadline DateTime?
+  interviewDate       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  applications Application[]
+
+  @@map("companies")
+}
+
+model Application {
+  id        String            @id @default(cuid())
+  studentId String
+  companyId String
+  status    ApplicationStatus @default(APPLIED)
+  appliedAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Resume information
+  resumeId   String? // ID of the selected resume
+  resumeUrl  String? // URL of the selected resume
+  resumeName String? // Name of the selected resume
+
+  // Interview and selection details
+  interviewScheduled Boolean   @default(false)
+  interviewDate     DateTime?
+  selectedAt        DateTime?
+  rejectedAt        DateTime?
+  notes             String?
+
+  // Relations
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, companyId])
+  @@map("applications")
+}
+
+model PlacementBlock {
+  id               String   @id @default(cuid())
+  studentId        String
+  reason           String   // "DEMERIT_BLOCK", "OFFER_JUMP_COOLDOWN"
+  blockedCompanies Int      // Number of companies to block
+  remainingBlocks  Int      // Remaining blocks
+  createdAt        DateTime @default(now())
+  expiresAt        DateTime?
+
+  @@map("placement_blocks")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String   // Who performed the action
+  action    String   // "CREATE_STUDENT", "UPDATE_CGPA", "APPLY_COMPANY", etc.
+  entityType String  // "STUDENT", "COMPANY", "APPLICATION"
+  entityId  String   // ID of the affected entity
+  oldValues Json?    // Previous values (for updates)
+  newValues Json?    // New values
+  metadata  Json?    // Additional context
+  timestamp DateTime @default(now())
+
+  // Relations
+  user User @relation("AuditLogUser", fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("system_config")
+}
+
+enum Role {
+  STUDENT
+  COORDINATOR
+}
+
+enum CompanyCategory {
+  ELITE
+  SUPER_DREAM
+  DREAM
+  NORMAL
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  SELECTED
+  REJECTED
+}

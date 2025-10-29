@@ -1,0 +1,45 @@
+{
+  "name": "smart-placement",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "build:production": "NODE_ENV=production next build",
+    "start:production": "NODE_ENV=production next start",
+    "db:migrate": "npx prisma migrate deploy",
+    "db:generate": "npx prisma generate",
+    "db:seed": "npx prisma db seed",
+    "db:reset": "npx prisma migrate reset",
+    "security:check": "npm audit",
+    "analyze": "ANALYZE=true npm run build"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "@tailwindcss/forms": "^0.5.10",
+    "@types/nodemailer": "^7.0.1",
+    "@types/pg": "^8.15.5",
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.2.0",
+    "cloudinary": "^2.7.0",
+    "clsx": "^2.1.1",
+    "formidable": "^3.5.4",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "next": "15.5.3",
+    "nodemailer": "^7.0.6",
+    "pg": "^8.16.3",
+    "prisma": "^6.16.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.3",
+    "tailwindcss": "^4"
+  }
+}
