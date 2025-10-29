@@ -12,6 +12,7 @@ All core functionality implemented and tested. Critical bug fixes completed. Rea
 
 ### For Students
 - **Dashboard**: Personal statistics and application overview
+- **Interview Preparation**: Access real interview experiences from top companies
 - **Resume Management**: Upload, manage multiple resume versions
 - **Company Browsing**: View active companies with eligibility status
 - **Eligibility Checker**: Real-time eligibility verification with detailed reasons
