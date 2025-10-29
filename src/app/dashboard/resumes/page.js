@@ -364,7 +364,7 @@ export default function ResumesPage() {
                 <li>Include quantifiable achievements</li>
                 <li>Tailor your resume for different types of companies</li>
                 <li>Save files in PDF format for best compatibility</li>
-                <li>Use descriptive names like "John_Doe_SoftwareDeveloper_Resume.pdf"</li>
+                <li>Use descriptive names like &quot;John_Doe_SoftwareDeveloper_Resume.pdf&quot;</li>
               </ul>
             </CardContent>
           </Card>

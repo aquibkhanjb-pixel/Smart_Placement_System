@@ -229,8 +229,8 @@ Alice,Johnson,alice.johnson@test.com,ECE2024003,ECE,2024,8.8,1,"VLSI,Embedded Sy
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Required Columns:</h4>
                   <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
-                    <li><strong>firstName</strong> - Student's first name</li>
-                    <li><strong>lastName</strong> - Student's last name</li>
+                    <li><strong>firstName</strong> - Student&apos;s first name</li>
+                    <li><strong>lastName</strong> - Student&apos;s last name</li>
                     <li><strong>email</strong> - Valid email address (must be unique)</li>
                     <li><strong>rollNumber</strong> - Student roll number (must be unique)</li>
                     <li><strong>department</strong> - Department code (CSE, IT, ECE, etc.)</li>
