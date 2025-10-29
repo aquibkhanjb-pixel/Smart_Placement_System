@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "postbuild": "prisma migrate deploy",
     "start": "next start",
     "lint": "eslint",
     "build:production": "NODE_ENV=production next build",
