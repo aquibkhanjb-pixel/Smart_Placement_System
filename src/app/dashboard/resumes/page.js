@@ -115,7 +115,18 @@ const ResumeUploadForm = ({ onUploadSuccess }) => {
         body: cloudinaryFormData,
       });
 
-      const cloudinaryData = await cloudinaryResponse.json();
+      // Check if response is ok before parsing JSON
+      if (!cloudinaryResponse.ok) {
+        const errorText = await cloudinaryResponse.text();
+        throw new Error(`Upload failed (${cloudinaryResponse.status}): ${errorText || 'Server error. File might be too large or upload timed out.'}`);
+      }
+
+      let cloudinaryData;
+      try {
+        cloudinaryData = await cloudinaryResponse.json();
+      } catch (jsonError) {
+        throw new Error('Upload timed out or server returned invalid response. Try with a smaller file (< 2MB recommended).');
+      }
 
       if (!cloudinaryData.success) {
         throw new Error(cloudinaryData.error || 'Cloudinary upload failed');
@@ -145,6 +156,11 @@ const ResumeUploadForm = ({ onUploadSuccess }) => {
           resumeData: resumeData,
         }),
       });
+
+      if (!updateResponse.ok) {
+        const errorText = await updateResponse.text();
+        throw new Error(`Failed to save resume data (${updateResponse.status}): ${errorText || 'Server error'}`);
+      }
 
       const updateData = await updateResponse.json();
 
