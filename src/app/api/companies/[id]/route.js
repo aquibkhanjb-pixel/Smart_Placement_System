@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma/index.js';
 import { COMPANY_CATEGORIES } from '../../../../types/index.js';
+import { verifyToken } from '../../../../lib/auth/jwt.js';
 
 // GET /api/companies/[id] - Get company by ID
 export async function GET(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const company = await prisma.company.findUnique({
       where: { id: params.id },
       include: {
@@ -53,6 +63,15 @@ export async function GET(request, { params }) {
 // PATCH /api/companies/[id] - Update company (Coordinator only)
 export async function PATCH(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const data = await request.json();
 
     // Validate category if provided
@@ -124,6 +143,15 @@ export async function PATCH(request, { params }) {
 // DELETE /api/companies/[id] - Delete company (Coordinator only)
 export async function DELETE(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     // Check if company has applications
     const applicationCount = await prisma.application.count({
       where: { companyId: params.id }

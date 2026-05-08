@@ -6,6 +6,15 @@ import { AuditLogger } from '../../../../lib/audit/index.js';
 // GET /api/students/[id] - Get specific student
 export async function GET(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const { id } = params;
 
     const student = await prisma.student.findUnique({
@@ -186,6 +195,15 @@ export async function PATCH(request, { params }) {
 // DELETE /api/students/[id] - Delete student
 export async function DELETE(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const { id } = params;
 
     await prisma.student.delete({

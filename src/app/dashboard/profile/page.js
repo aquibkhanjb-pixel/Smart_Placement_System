@@ -86,19 +86,20 @@ const ProfilePage = () => {
         }
 
         const data = await response.json();
-        setStudentData(data);
+        const studentInfo = data.student;
+        setStudentData(studentInfo);
 
         // Populate form
         setFormData({
-          firstName: data.user?.firstName || '',
-          lastName: data.user?.lastName || '',
-          email: data.user?.email || '',
-          rollNumber: data.rollNumber || '',
-          cgpa: data.cgpa?.toString() || '',
-          department: data.department || '',
-          graduationYear: data.graduationYear?.toString() || '',
-          skills: data.skills ? JSON.parse(data.skills).join(', ') : '',
-          currentOffer: data.currentOffer?.toString() || '',
+          firstName: studentInfo.user?.firstName || '',
+          lastName: studentInfo.user?.lastName || '',
+          email: studentInfo.user?.email || '',
+          rollNumber: studentInfo.rollNumber || '',
+          cgpa: studentInfo.cgpa?.toString() || '',
+          department: studentInfo.department || '',
+          graduationYear: studentInfo.graduationYear?.toString() || '',
+          skills: studentInfo.skills ? JSON.parse(studentInfo.skills).join(', ') : '',
+          currentOffer: studentInfo.currentOffer?.toString() || '',
         });
       } else {
         // For coordinators, just use user data
@@ -460,14 +461,14 @@ const ProfilePage = () => {
               {studentData?.resumeUrls && JSON.parse(studentData.resumeUrls).length > 0 ? (
                 <div className="space-y-2">
                   <h3 className="font-medium text-gray-700">Current Resumes:</h3>
-                  {JSON.parse(studentData.resumeUrls).map((url, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <span className="text-sm text-gray-700">Resume {index + 1}</span>
+                  {JSON.parse(studentData.resumeUrls).map((resume, index) => (
+                    <div key={resume.id || index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-700">{resume.name || `Resume ${index + 1}`}</span>
                       <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="secondary"
-                          onClick={() => handleViewResume(url)}
+                          onClick={() => handleViewResume(resume.url)}
                         >
                           View
                         </Button>

@@ -10,6 +10,16 @@ const eligibilityEngine = new EligibilityEngine();
 // GET /api/applications - List applications
 export async function GET(request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get('studentId');
     const companyId = searchParams.get('companyId');

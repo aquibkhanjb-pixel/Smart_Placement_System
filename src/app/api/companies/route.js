@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma/index.js';
 import { COMPANY_CATEGORIES } from '../../../types/index.js';
+import { verifyToken } from '../../../lib/auth/jwt.js';
 
 // GET /api/companies - List all companies
 export async function GET(request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
@@ -85,6 +95,15 @@ export async function GET(request) {
 // POST /api/companies - Create new company (Coordinator only)
 export async function POST(request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const {
       name,
       description,

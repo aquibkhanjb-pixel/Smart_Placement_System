@@ -58,7 +58,7 @@ const StudentCard = ({ student, onViewApplications }) => (
             </div>
             <div>
               <span className="font-medium text-gray-700">Applications:</span>
-              <p className="text-gray-900">{student._count?.applications || 0}</p>
+              <p className="text-gray-900">{student.applications?.length || 0}</p>
             </div>
             <div>
               <span className="font-medium text-gray-700">Current Offer:</span>
