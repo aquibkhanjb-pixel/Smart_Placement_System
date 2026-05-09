@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma/index.js';
 import { APPLICATION_STATUS } from '../../../../types/index.js';
+import { verifyToken } from '../../../../lib/auth/jwt.js';
 
 // GET /api/applications/[id] - Get application by ID
 export async function GET(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const application = await prisma.application.findUnique({
       where: { id: params.id },
       include: {
@@ -54,6 +64,15 @@ export async function GET(request, { params }) {
 // PATCH /api/applications/[id] - Update application status (Coordinator only)
 export async function PATCH(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     const data = await request.json();
 
     // Validate status if provided
@@ -132,6 +151,15 @@ export async function PATCH(request, { params }) {
 // DELETE /api/applications/[id] - Withdraw application (Student only for own applications)
 export async function DELETE(request, { params }) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const decoded = verifyToken(authHeader.substring(7));
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
     // Get application first to check ownership and status
     const application = await prisma.application.findUnique({
       where: { id: params.id },

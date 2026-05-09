@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/auth/context.js';
+import { ProtectedRoute } from '../../../components/auth/index.js';
+import { DashboardLayout } from '../../../components/dashboard/index.js';
 import { Button, Card } from '../../../components/ui/index.js';
 import Link from 'next/link';
 
@@ -18,8 +20,8 @@ const ApplicationsPage = () => {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
-    fetchApplications();
-  }, []);
+    if (user) fetchApplications();
+  }, [user]);
 
   const fetchApplications = async () => {
     try {
@@ -174,13 +176,19 @@ const ApplicationsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
+      <ProtectedRoute>
+        <DashboardLayout>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          </div>
+        </DashboardLayout>
+      </ProtectedRoute>
     );
   }
 
   return (
+    <ProtectedRoute>
+      <DashboardLayout>
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
@@ -456,6 +464,8 @@ const ApplicationsPage = () => {
         </div>
       )}
     </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 };
 

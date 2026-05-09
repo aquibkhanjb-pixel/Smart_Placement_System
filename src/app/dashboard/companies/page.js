@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../lib/auth/context.js';
+import { ProtectedRoute } from '../../../components/auth/index.js';
+import { DashboardLayout } from '../../../components/dashboard/index.js';
 import { Button } from '../../../components/ui/index.js';
 import { Card } from '../../../components/ui/index.js';
 import Link from 'next/link';
@@ -20,11 +22,37 @@ const CompaniesPage = () => {
   const [eligibilityResults, setEligibilityResults] = useState({});
 
   useEffect(() => {
-    fetchCompanies();
-    if (user?.role === USER_ROLES.STUDENT) {
-      fetchEligibility();
-    }
+    if (user) fetchCompanies();
   }, [user]);
+
+  const fetchEligibility = async (companyIds) => {
+    if (!companyIds?.length) return;
+    try {
+      const response = await fetch('/api/eligibility/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ companyIds }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const resultsMap = {};
+        if (data.eligibilityResults) {
+          data.eligibilityResults.forEach(result => {
+            resultsMap[result.companyId] = {
+              eligible: result.isEligible && result.canApply,
+              reasons: result.reasons,
+            };
+          });
+        }
+        setEligibilityResults(resultsMap);
+      }
+    } catch (err) {
+      console.error('Failed to fetch eligibility:', err);
+    }
+  };
 
   const fetchCompanies = async () => {
     try {
@@ -39,28 +67,15 @@ const CompaniesPage = () => {
       }
 
       const data = await response.json();
-      setCompanies(data.companies || []);
+      const companiesList = data.companies || [];
+      setCompanies(companiesList);
+      if (user?.role === USER_ROLES.STUDENT && companiesList.length > 0) {
+        await fetchEligibility(companiesList.map(c => c.id));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchEligibility = async () => {
-    try {
-      const response = await fetch('/api/eligibility/check', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setEligibilityResults(data.results || {});
-      }
-    } catch (err) {
-      console.error('Failed to fetch eligibility:', err);
     }
   };
 
@@ -173,13 +188,19 @@ const CompaniesPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
+      <ProtectedRoute>
+        <DashboardLayout>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          </div>
+        </DashboardLayout>
+      </ProtectedRoute>
     );
   }
 
   return (
+    <ProtectedRoute>
+      <DashboardLayout>
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Company Management</h1>
@@ -388,6 +409,8 @@ const CompaniesPage = () => {
         </div>
       )}
     </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 };
 

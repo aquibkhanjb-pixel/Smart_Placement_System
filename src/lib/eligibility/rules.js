@@ -58,7 +58,9 @@ export class EligibilityEngine {
   }
 
   calculateDemeritBlock(demerits) {
-    for (const [demeritThreshold, blockCount] of Object.entries(this.rules.DEMERIT_BLOCKS)) {
+    const entries = Object.entries(this.rules.DEMERIT_BLOCKS)
+      .sort((a, b) => parseInt(b[0]) - parseInt(a[0]));
+    for (const [demeritThreshold, blockCount] of entries) {
       if (demerits >= parseInt(demeritThreshold)) {
         return blockCount;
       }

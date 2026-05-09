@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../../lib/auth/context.js';
+import { ProtectedRoute } from '../../../../components/auth/index.js';
+import { DashboardLayout } from '../../../../components/dashboard/index.js';
 import { Button, Card, Input } from '../../../../components/ui/index.js';
 import { DEPARTMENTS } from '../../../../types/index.js';
 
@@ -29,7 +31,7 @@ const DemeritManagementPage = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch('/api/students', {
+      const response = await fetch('/api/students?limit=200', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -142,24 +144,32 @@ const DemeritManagementPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
+      <ProtectedRoute>
+        <DashboardLayout>
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+          </div>
+        </DashboardLayout>
+      </ProtectedRoute>
     );
   }
 
   if (user?.role !== 'COORDINATOR') {
     return (
-      <div className="p-6">
-        <Card className="p-8 text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
-          <p className="text-gray-600">Demerit management is only available for coordinators.</p>
-        </Card>
-      </div>
+      <ProtectedRoute>
+        <DashboardLayout>
+          <Card className="p-8 text-center">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Restricted</h2>
+            <p className="text-gray-600">Demerit management is only available for coordinators.</p>
+          </Card>
+        </DashboardLayout>
+      </ProtectedRoute>
     );
   }
 
   return (
+    <ProtectedRoute>
+      <DashboardLayout>
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -388,6 +398,8 @@ const DemeritManagementPage = () => {
         </div>
       )}
     </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 };
 
