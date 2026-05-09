@@ -20,6 +20,7 @@ const CompaniesPage = () => {
   const [selectedResume, setSelectedResume] = useState('');
   const [applying, setApplying] = useState(false);
   const [eligibilityResults, setEligibilityResults] = useState({});
+  const [appliedCompanyIds, setAppliedCompanyIds] = useState(new Set());
 
   useEffect(() => {
     if (user) fetchCompanies();
@@ -54,6 +55,22 @@ const CompaniesPage = () => {
     }
   };
 
+  const fetchAppliedCompanies = async () => {
+    if (!user?.student?.id) return;
+    try {
+      const response = await fetch(`/api/applications?studentId=${user.student.id}&limit=200`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const ids = new Set((data.applications || []).map(a => a.companyId));
+        setAppliedCompanyIds(ids);
+      }
+    } catch (err) {
+      console.error('Failed to fetch applied companies:', err);
+    }
+  };
+
   const fetchCompanies = async () => {
     try {
       const response = await fetch('/api/companies', {
@@ -70,7 +87,10 @@ const CompaniesPage = () => {
       const companiesList = data.companies || [];
       setCompanies(companiesList);
       if (user?.role === USER_ROLES.STUDENT && companiesList.length > 0) {
-        await fetchEligibility(companiesList.map(c => c.id));
+        await Promise.all([
+          fetchEligibility(companiesList.map(c => c.id)),
+          fetchAppliedCompanies(),
+        ]);
       }
     } catch (err) {
       setError(err.message);
@@ -134,9 +154,10 @@ const CompaniesPage = () => {
 
       const data = await response.json();
       if (data.success) {
-        alert('Application submitted successfully!');
+        setAppliedCompanyIds(prev => new Set([...prev, selectedCompany.id]));
         setShowApplicationModal(false);
         setSelectedResume('');
+        alert('Application submitted successfully!');
       } else {
         alert(data.error || 'Application failed');
       }
@@ -308,9 +329,15 @@ const CompaniesPage = () => {
                   ) : (
                     user?.role === USER_ROLES.STUDENT && company.isActive && (
                       (() => {
+                        if (appliedCompanyIds.has(company.id)) {
+                          return (
+                            <Button variant="secondary" size="sm" disabled>
+                              Already Applied
+                            </Button>
+                          );
+                        }
                         const eligibility = eligibilityResults[company.id];
                         const isEligible = eligibility?.eligible;
-
                         if (isEligible) {
                           return (
                             <Button
@@ -321,18 +348,17 @@ const CompaniesPage = () => {
                               Apply Now
                             </Button>
                           );
-                        } else {
-                          return (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              disabled
-                              title={`Not eligible: ${eligibility?.reasons?.join(', ') || 'Checking eligibility...'}`}
-                            >
-                              Not Eligible
-                            </Button>
-                          );
                         }
+                        return (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled
+                            title={`Not eligible: ${eligibility?.reasons?.join(', ') || 'Checking eligibility...'}`}
+                          >
+                            Not Eligible
+                          </Button>
+                        );
                       })()
                     )
                   )}

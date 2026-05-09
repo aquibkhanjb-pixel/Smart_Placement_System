@@ -136,7 +136,7 @@ const StudentDashboard = ({ user }) => {
               <p className="text-sm text-gray-600">See which companies you qualify for</p>
             </Link>
             <a
-              href={process.env.NEXT_PUBLIC_INTERVIEW_PREP_URL || "https://interview-intelligence-frontend.vercel.app"}
+              href={process.env.NEXT_PUBLIC_INTERVIEW_PREP_URL || "https://interview-guider-mauve.vercel.app"}
               target="_blank"
               rel="noopener noreferrer"
               className="p-4 border-2 border-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg hover:from-blue-100 hover:to-indigo-100 text-left block transition-all duration-200"
