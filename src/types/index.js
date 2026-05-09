@@ -20,11 +20,19 @@ export const APPLICATION_STATUS = {
 };
 
 export const DEPARTMENTS = [
-  'CMPN', // Computer Engineering
-  'EXTC', // Electronics & Telecommunication Engineering
-  'EXCS', // Computer Science Engineering
-  'BioMed', // Biomedical Engineering
-  'INFT', // Information Technology
+  'BioMed',
+  'BT',
+  'CHEM',
+  'CIVIL',
+  'CMPN',
+  'CSE',
+  'ECE',
+  'EEE',
+  'EXTC',
+  'EXCS',
+  'INFT',
+  'IT',
+  'MECH',
 ];
 
 // Business rule constants

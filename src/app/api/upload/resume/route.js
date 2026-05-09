@@ -1,21 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { verifyToken } from '../../../../lib/auth/jwt.js';
 import { prisma } from '../../../../lib/prisma/index.js';
-import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-// Ensure uploads directory exists
-const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'resumes');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
 
 export async function POST(request) {
   try {
@@ -70,7 +57,13 @@ export async function POST(request) {
       }
     }
 
-    // Handle traditional file upload (FormData)
+    // Handle traditional file upload (FormData) — Vercel: redirect to Cloudinary
+    if (process.env.VERCEL) {
+      return NextResponse.json({
+        error: 'Local file upload is not supported on this deployment. Please use the Cloudinary upload path (upload via the Resume page).'
+      }, { status: 400 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('resume');
     const resumeName = formData.get('resumeName') || 'My Resume';
@@ -94,7 +87,9 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Generate unique filename
+    // Generate unique filename and save locally (dev only)
+    const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'resumes');
+    try { fs.mkdirSync(uploadsDir, { recursive: true }); } catch (_) {}
     const timestamp = Date.now();
     const extension = path.extname(file.name);
     const filename = `${user.student.rollNumber}_${timestamp}${extension}`;
@@ -226,8 +221,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
     }
 
-    // Delete file from filesystem (only for local files, not Cloudinary)
-    if (!resumeToDelete.cloudinaryUrl) {
+    // Delete file from filesystem (only for local dev files, not Cloudinary)
+    if (!resumeToDelete.cloudinaryUrl && !process.env.VERCEL) {
+      const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'resumes');
       const filepath = path.join(uploadsDir, resumeToDelete.filename);
       if (fs.existsSync(filepath)) {
         fs.unlinkSync(filepath);

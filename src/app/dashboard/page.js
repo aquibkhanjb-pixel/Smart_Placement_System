@@ -217,9 +217,9 @@ const CoordinatorDashboard = ({ user }) => {
       const applicationsData = await applicationsRes.json();
 
       setStats({
-        students: studentsData.students?.length || 0,
-        companies: companiesData.companies?.length || 0,
-        applications: applicationsData.applications?.length || 0,
+        students: studentsData.pagination?.total ?? studentsData.students?.length ?? 0,
+        companies: companiesData.pagination?.total ?? companiesData.companies?.length ?? 0,
+        applications: applicationsData.pagination?.total ?? applicationsData.applications?.length ?? 0,
         placements: applicationsData.applications?.filter(app => app.status === 'SELECTED').length || 0,
         loading: false,
       });

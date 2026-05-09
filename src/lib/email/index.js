@@ -35,3 +35,6 @@ export {
   sendBulkEmail,
   testEmailConnection
 } from "./services.js";
+
+// Export emailService singleton (used by notification routes)
+export { emailService } from "./service.js";

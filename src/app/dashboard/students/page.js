@@ -123,7 +123,7 @@ export default function StudentsPage() {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch('/api/students', {
+      const response = await fetch('/api/students?limit=200', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
